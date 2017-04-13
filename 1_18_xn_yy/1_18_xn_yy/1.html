@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="http://s2.hqbcdn.com/??mobile/lib/zepto.min.js,mobile/lib/zepto.lazyload.min.js,mobile/lib/zepto.cookie.min.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+    /*底部导航*/
+    $('.wu').tap(function(){
+        $('.subNav-con').toggle();
+    });
+    function scroll(){
+        setInterval(function(){
+            $('.slide ul').animate({
+                'margin-top':'-20%'
+            },500,function(){
+                $(this).css({'margin-top':'0'}).find('li:first').appendTo($(this))
+            })
+        },1500)
+    }
+    scroll();
+    $(function(){
+        var iWidth=document.documentElement.clientWidth;
+        if(iWidth>=640){
+            $('html').css('font-size',16);
+        }else{
+            $('html').css('font-size',iWidth/32);
+        }
+        var CG = {
+            navBar: $('.cg-nav'),
+            isLogin: false,
+            init: function(){
+                this.loadImage();
+                this.windowScrollNavFix();
+                this.action();
+                this.coupons();
+                this.isLogied();
+                this.xn();
+            },
+            xn:function(){
+                $('.hb-mskLayer ul li').tap(function(){
+                    var result='';
+                    var awardsArr={
+                        'ONE_GIFT_CARD_NY':'1',
+                        'TWO_GIFT_CARD_NY':'2',
+                        'THREE_GIFT_CARD_NY':'3',
+                        'FIVE_GIFT_CARD_NY':'5',
+                        'FIVE_COUPONS_NY':'5',
+                        'HUNDRED_COUPONS_NY':'100',
+                        'TWO_HUNDRED_COUPONS_NY':'200',
+                        'THREE_HUNDRED_COUPONS_NY':'300',
+                        'THANK_YOU_NY':'可能姿势不对，没关系,祝你新年快乐，万事如意!'
+                    };
+                    $.ajax({
+                        type:'GET',
+                        url:'http://my.okhqb.com/my/getRotaryRewardNew.json?rotaryType=NY',    /*新年特惠接口*/
+                        dataType:'jsonp',
+                        success:function(d){
+                            if(d.code==200){
+                                var  $rotaryRewardNewEnum=d.data.rotaryRewardNewEnum;
+                                var $prize=awardsArr[$rotaryRewardNewEnum];
+                                console.log($prize);
+                                if($rotaryRewardNewEnum =='THANK_YOU_NY'){
+                                    result=' <div class="xie"> <p>可能姿势不对，没关系,</p>祝你新年快乐，万事如意! </div>';
+                                    $('.hb-info').html(result);
+                                    $('.hb-tc').show();
+                                }
+                                else if($rotaryRewardNewEnum =='ONE_GIFT_CARD_NY'|| $rotaryRewardNewEnum =='TWO_GIFT_CARD_NY'|| $rotaryRewardNewEnum =='THREE_GIFT_CARD_NY'|| $rotaryRewardNewEnum =='FIVE_GIFT_CARD_NY'){
+                                    result='<div class="hb-award">恭喜你抽中<b>'+$prize+'</b>元小强卡</div><a href="http://m.okhqb.com/my/coupons.html">进入“我的账户-优惠券 ”可进行查询</a>';
+                                    $('.hb-info').html(result);
+                                    $('.hb-tc').show();
+
+                                }else{
+                                    result='<div class="hb-award">恭喜你抽中<b>'+$prize+'</b>元优惠券</div><a href="http://m.okhqb.com/my/coupons.html">进入“我的账户-优惠券 ”可进行查询</a>';
+                                    $('.hb-info').html(result);
+                                    $('.hb-tc').show();
+                                }
+                            }
+                            else if(d.code == 590){
+                                window.location.href = 'http://m.okhqb.com/member/login.html';
+                            }
+                            else if(d.code==701370){
+                                result='<div class="hb-award">今天的机会已经用完咯！</div><a>购买任意商品可增加一次机会哦！</a>';
+                                $('.hb-info').html(result);
+                                $('.hb-tc').show();
+                            }
+                            else{
+                                result='<div class="hb-award"> <p style="margin-top: 16px">'+d.msg+'</p></div>';
+                                $('.hb-info').html(result);
+                                $('.hb-tc').show();
+                            }
+                        }
+
+                    })
+                });
+                /*红包*/
+                $('.hb .btn').tap(function() {
+                    if(!CG.isLogin){
+                        window.location.href = 'http://m.okhqb.com/member/login.html';
+                    }else{
+                        var iHeight = document.documentElement.clientHeight;
+                        $('body').height(iHeight).css({
+                            'overflow': 'hidden'
+                        });
+                        $('.hb-mskLayer').show();
+                    }
+                });
+                $('.hb-tc').tap(function(){
+                    $(this).hide();
+                    $('.hb-mskLayer').hide();
+                    $('body').height('auto');
+                });
+            },
+            coupons:function(){
+                //优惠券
+                $('.coupons-info ul li').tap(function(e){
+                    var id = $(this).attr('data-id');
+                    getCoupids(id);
+                });
+                function getCoupids(couponId){
+                    $.ajax({
+                        url : "http://my.okhqb.com/my/getCoupons.json",
+                        data : {
+                            'couponId' : couponId
+                        },
+                        type : "GET",
+                        dataType : 'jsonp',
+                        jsonp : 'callback',
+                        success : function (data) {
+                            if(data.code == 200){
+                                $('.mskLayer').show();
+                                $('.popUp p').html('领取成功，优惠券已经发放至您的个人中心');
+                            }
+                            else if(data.code ==590){
+                                window.location.href='http://m.okhqb.com/member/login.html';
+                            }
+                            else {
+                                $('.mskLayer').show();
+                                $('.popUp p').html(data.msg);
+                            }
+
+                        }
+                    });
+                }
+                //关闭弹框
+                $('.mskLayer').tap(function(){
+                    $(this).hide();
+                });
+            },
+            action: function(){
+                $('.cg-nav-list .box-flex').tap(function () {
+                    var $this = $(this),
+                            pos = $this.attr('data-pos'),
+                            $sib = $this.siblings(),
+                            top = 0,
+                            $h = $('.cg-nav').height(),
+                            $l = $('.fixed').length;
+                    if ($l > 0) {
+                        top = $('#' + pos).offset().top - $h;
+                    } else {
+                        top = $('#' + pos).offset().top - $h * 1.8;
+                    }
+                    $sib.removeClass('active');
+                    $this.addClass('active');
+                    $('html, body').scrollTop(top);
+
+                });
+            },
+            windowScrollNavFix:function(){
+                var initTop = $('.cg-nav').position().top+20;
+                $(window).scroll(function(){
+                    if($(this).scrollTop()>initTop){
+                        CG.navBar.addClass('fixed');
+                        $('.floor3 .goods-2 ul li img').removeClass('lazy');
+                    }else{
+                        CG.navBar.removeClass('fixed');
+                    }
+                });
+            },
+            loadImage:function(){
+                $('.lazy').picLazyLoad({
+                    threshold: 30
+                });
+            },
+            isLogied:function(){
+                $.ajax({
+                    type:'GET',
+                    url:'http://login.okhqb.com/member/getLoginInfo.json',
+                    dataType:'jsonp',
+                    success:function(result){
+                        if( result.code == 200 ){
+                            var result_data = $.parseJSON( result.data );
+                            if( result_data.logined != 0 ){
+                                CG.isLogin = true;
+                            }
+                        }
+                    }
+                });
+            }
+        };
+        CG.init();
+    });
+</script>
+</body>
+</html>

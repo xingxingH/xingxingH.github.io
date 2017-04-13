@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>tab切换</title>
+    <link rel="stylesheet" type="text/css" href="../states/css/base.css" />
+    <script type="text/javascript" src="../states/js/jquery-3.1.1.min.js"></script>
+    <style type="text/css">
+        .tab{width: 604px}
+        .tab .nav{border-right:solid 1px #000;}
+        .tab .nav ul{overflow: hidden;}
+        .tab .nav ul li{float: left;width: 200px;height: 50px;border-top:solid 1px #000;border-left:solid 1px #000;line-height:50px;text-align: center;font-size: 18px;}
+        .tab .nav ul li.active{color:red}
+        .tab .content{border:solid 1px #000}
+        .tab .content ul{}
+        .tab .content ul li{display:none;width: 600px; height: 400px;}
+
+    </style>
+</head>
+<body>
+<div class="tab">
+    <div class="nav">
+        <ul>
+            <li class="active">第一个</li>
+            <li>第二个</li>
+            <li>第三个</li>
+        </ul>
+    </div>
+    <div class="content">
+        <ul>
+            <li>内容一</li>
+            <li>内容二</li>
+            <li>内容三</li>
+        </ul>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function(){
+        var $contentLi = $('.content ul li');
+            $contentLi.first().show();
+        $('.nav ul li').on('click',function(){
+          var $index = $(this).index();
+            $(this).addClass('active').siblings().removeClass('active');
+             $contentLi.eq($index).show().siblings().hide();
+        })
+    })
+</script>
+</body>
+</html>
